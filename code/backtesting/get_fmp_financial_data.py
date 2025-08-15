@@ -1,7 +1,13 @@
-from fmp_python.fmp import FMP
-import pandas as pd
-from datetime import datetime, timedelta
+"""
+Module to download financial data from Financial Modeling Prep (FMP)
+and add calculated indicators like PDH, PDL, and wick information.
+"""
 import time
+from datetime import datetime, timedelta
+
+import pandas as pd
+from fmp_python.fmp import FMP
+
 
 def download_data(api_key, start_date, end_date, timeframe, symbol, output_dir="."):
     """
@@ -39,9 +45,7 @@ def download_data(api_key, start_date, end_date, timeframe, symbol, output_dir="
 
     # Loop in 10-day chunks
     while current_dt <= end_dt:
-        chunk_end_dt = current_dt + timedelta(days=9)
-        if chunk_end_dt > end_dt:
-            chunk_end_dt = end_dt
+        chunk_end_dt = min(current_dt + timedelta(days=9), end_dt)
 
         print(f"Downloading {symbol} data from {current_dt.date()} to {chunk_end_dt.date()}")
 
@@ -78,7 +82,6 @@ def download_data(api_key, start_date, end_date, timeframe, symbol, output_dir="
     return file_path
 
 
-# función para agregar columnas de wick al CSV
 def add_wick_info_to_csv(file_path):
     """
     Agrega columnas de upper_wick, lower_wick y total_wick al archivo CSV especificado.
@@ -95,6 +98,7 @@ def add_wick_info_to_csv(file_path):
     df.to_csv(file_path, index=False)
     print(f"Columnas 'upper_wick', 'lower_wick' y 'total_wick' agregadas a {file_path}. Total de registros: {len(df)}")
 
+
 def add_pdh_pdl_to_csv(file_path, target_date, output_file=None):
     """
     Agrega columnas 'pdh' y 'pdl' al CSV, asignando el mismo valor a todas las filas
@@ -109,18 +113,22 @@ def add_pdh_pdl_to_csv(file_path, target_date, output_file=None):
     output_file : str, opcional
         Ruta de archivo para guardar el resultado. Si es None, sobrescribe el archivo original.
     """
-    df = pd.read_csv(file_path)
+    try:
+        df = pd.read_csv(file_path)
+    except FileNotFoundError:
+        print(f"Error: El archivo no se encontró en la ruta '{file_path}'.")
+        return
+
     df['date'] = pd.to_datetime(df['date'])
 
-    # Si la columna 'date' tiene zona horaria, convertir a la zona local (America/Bogota)
     if df['date'].dt.tz is not None or df['date'].astype(str).str.contains(r'[+-][0-9]{2}:[0-9]{2}$').any():
         try:
             df['date'] = pd.to_datetime(df['date'], utc=True)
             df['date'] = df['date'].dt.tz_convert('America/Bogota')
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Error al manejar la zona horaria: {e}")
+            return
 
-    # Buscar por la parte de fecha local ignorando la hora y el offset
     mask = df['date'].dt.strftime('%Y-%m-%d') == target_date
     if not mask.any():
         print(f"No hay datos para la fecha {target_date}")
@@ -136,4 +144,3 @@ def add_pdh_pdl_to_csv(file_path, target_date, output_file=None):
     df.to_csv(save_path, index=False)
 
     print(f"PDH ({pdh_value}) y PDL ({pdl_value}) agregados para la fecha {target_date}. Filas afectadas: {mask.sum()}")
-
