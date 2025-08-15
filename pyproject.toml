@@ -18,6 +18,10 @@ dependencies = [
     "pyqt5 (>=5.15.11,<6.0.0)",
     "plotly (>=5.0.0,<6.0.0)"
 ]
+packages = [
+    { include = "code" },
+    { include = "backtesting" }
+]
 
 
 [build-system]
