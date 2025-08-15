@@ -1,0 +1,31 @@
+@startuml
+start
+:Inicialización de la estrategia;
+repeat
+    :Obtener fecha de la barra actual;
+    :¿Es un nuevo día?;
+    if (Sí) then (Nuevo día)
+        :¿Había día anterior?;
+        if (Sí) then (Imprimir máximo)
+            :Imprimir máximo diario del día anterior;
+        else (No)
+            :Primer día, solo actualizar current_day;
+        endif
+        :Actualizar current_day al día actual;
+        :Reiniciar daily_high con el high de la barra actual;
+    else (No)
+        :¿High actual > daily_high?;
+        if (Sí) then (Actualizar)
+            :Actualizar daily_high;
+        else (No)
+            :No hacer nada;
+        endif
+    endif
+repeat while (Quedan barras)
+:Fin del backtest;
+:¿Hay día en curso?;
+if (Sí) then (Imprimir máximo)
+    :Imprimir máximo diario del último día;
+endif
+stop
+@enduml

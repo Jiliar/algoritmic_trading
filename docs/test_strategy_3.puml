@@ -1,0 +1,36 @@
+@startuml
+start
+:Inicialización de la estrategia;
+repeat
+    :¿Hay orden pendiente?;
+    if (Sí) then (Esperar)
+        :No hacer nada;
+    else (No)
+        :¿Hay posición abierta?;
+        if (No) then (No en el mercado)
+            :¿Cierre actual < Cierre anterior?;
+            if (Sí) then
+                :¿Cierre anterior < Cierre hace 2 barras?;
+                if (Sí) then (Comprar)
+                    :Registrar señal de compra;
+                    :Crear orden de compra;
+                else (No)
+                    :Esperar siguiente barra;
+                endif
+            else (No)
+                :Esperar siguiente barra;
+            endif
+        else (Sí, en el mercado)
+            :¿Han pasado 5 barras desde la compra?;
+            if (Sí) then (Vender)
+                :Registrar señal de venta;
+                :Crear orden de venta;
+            else (No)
+                :Esperar siguiente barra;
+            endif
+        endif
+    endif
+repeat while (Quedan barras)
+:Fin del backtest;
+stop
+@enduml

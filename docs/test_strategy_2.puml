@@ -1,0 +1,47 @@
+@startuml
+start
+:Inicialización de la estrategia;
+repeat
+    :Obtener fecha de la barra actual;
+    :¿Ha cambiado el día?;
+    if (Sí) then (Nuevo día)
+        :¿Había día anterior?;
+        if (Sí) then (Guardar cierre y log)
+            :Guardar cierre del día anterior en la lista;
+            :Mostrar cierre diario en el log;
+            :¿Hay al menos 3 cierres diarios?;
+            if (Sí) then (Comprobar tendencia)
+                :¿Tres días consecutivos bajando?;
+                if (Sí) then (Comprar)
+                    :Log de compra y ejecutar orden de compra;
+                else (No)
+                    :No hacer nada especial;
+                endif
+            else (No)
+                :Esperar más días;
+            endif
+        else (No)
+            :Primer día, solo actualizar current_day;
+        endif
+        :Actualizar current_day al día actual;
+    else (No)
+        :Continuar con el mismo día;
+    endif
+    :Guardar cierre de la barra actual;
+repeat while (Quedan barras)
+:Fin del backtest;
+:¿Hay día en curso?;
+if (Sí) then (Guardar y log)
+    :Guardar cierre del último día;
+    :Mostrar cierre diario en el log;
+    :¿Últimos 3 cierres bajistas?;
+    if (Sí) then (Comprar)
+        :Log de compra y ejecutar orden de compra;
+    else (No)
+        :Fin;
+    endif
+else (No)
+    :Fin;
+endif
+stop
+@enduml
