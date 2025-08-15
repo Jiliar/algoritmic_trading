@@ -2,6 +2,13 @@ import pandas as pd
 import json
 import os
 
+"""
+Módulo para tratamiento de datos financieros: extracción de PDH/PDL únicos y guardado de logs.
+"""
+
+import os
+import pandas as pd
+
 def obtener_datos_pdh_pdl_unicos(file_path):
     """
     Lee un archivo CSV y extrae los valores únicos de PDH y PDL por fecha,
@@ -39,6 +46,8 @@ def obtener_datos_pdh_pdl_unicos(file_path):
             }
         
         return unique_dict
+    except Exception:
+        return None
 
     except FileNotFoundError:
         print(f"Error: El archivo no se encontró en la ruta '{file_path}'.")
